@@ -1,0 +1,17 @@
+{
+  "root": "/home/dev/feedback/uid26328",
+  "B": "/home/dev/feedback/uid26328",
+  "sha": "2cb646bc82c7fb46ae231c6275c8b749b465ad7b",
+  "wslDistro": "Ubuntu-26.04",
+  "source": {
+    "owner": "katspaugh",
+    "repo": "wavesurfer.js",
+    "sha": "2cb646bc82c7fb46ae231c6275c8b749b465ad7b"
+  },
+  "fork": {
+    "owner": "Rrr119",
+    "repo": "wavesurfer.js",
+    "cloneUrl": "https://github.com/Rrr119/wavesurfer.js.git"
+  },
+  "at": "2026-11-18T19:30:30.130Z"
+}

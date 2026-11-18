@@ -13,6 +13,11 @@
  * so they can't live in `plugins/spectrogram.ts` itself without breaking that single-default-export
  * constraint (confirmed by rollup's own build-time error when they briefly did). Same reasoning
  * `spectrogram-frequencies.ts` already followed for `computeFrequencies`.
+ *
+ * The plugin's canvases live in the waveform wrapper, not in a separate cursor layer: the
+ * renderer's playhead/progress elements stay above them and therefore remain synchronized with
+ * playback and with the current zoom. Windowed mode additionally re-renders on `timeupdate` and
+ * scroll so auto-scrolling playback keeps its visible segments covered.
  */
 
 import {
@@ -706,7 +711,11 @@ export function spectrogramSetup(
   }
 
   function getWrapperWidth(): number {
-    return ctx.wavesurfer?.getWrapper()?.clientWidth || 0
+    const wrapper = ctx.wavesurfer?.getWrapper()
+    // The wrapper is as wide as the whole scrollable waveform; its parent is the viewport that
+    // actually clips it. Prefer the parent's width so `isScrollable` reflects what the user sees
+    // rather than comparing the full width with itself.
+    return wrapper?.parentElement?.clientWidth || wrapper?.clientWidth || 0
   }
 
   // Single source of truth for "should this render split its channels into separate rows":
@@ -1729,8 +1738,9 @@ export function spectrogramSetup(
         const wsWrapper = ctx.wavesurfer?.getWrapper()
         if (!wsWrapper) return
 
-        const scrollLeft = wsWrapper.scrollLeft || 0
-        const containerWidth = wsWrapper.clientWidth || 0
+        const scrollTarget = wsWrapper.parentElement ?? wsWrapper
+        const scrollLeft = scrollTarget.scrollLeft || 0
+        const containerWidth = scrollTarget.clientWidth || wsWrapper.clientWidth || 0
 
         // Calculate visible range with some buffer
         const bufferRatio = 0.5 // Render 50% extra on each side
@@ -1762,8 +1772,13 @@ export function spectrogramSetup(
       }
 
       const wsWrapper = ctx.wavesurfer?.getWrapper()
-      if (wsWrapper) {
-        const removeScrollListener = ctx.scope.listen(wsWrapper, 'scroll', onScroll, { passive: true })
+      // The renderer scrolls `.scroll`, the wrapper's parent, not the wrapper itself. Scroll
+      // events do not bubble, so listening on `wsWrapper` never marked the newly visible
+      // canvases on a long, zoomed-in file. Keep the wrapper as a fallback for custom hosts
+      // that make it the scroll container.
+      const scrollTarget = wsWrapper?.parentElement ?? wsWrapper
+      if (scrollTarget) {
+        const removeScrollListener = ctx.scope.listen(scrollTarget, 'scroll', onScroll, { passive: true })
         scrollUnsubscribe = () => {
           removeScrollListener()
           cancelScrollTimeout?.()

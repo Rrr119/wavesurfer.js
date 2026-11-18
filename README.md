@@ -135,6 +135,14 @@ which is now deprecated in favor of the merged option above — it's kept workin
 as a thin backward-compatible shim, but new code should use `SpectrogramPlugin`
 directly.
 
+For an editor-style layout, see the
+[Podcast Spectrogram example](https://wavesurfer.xyz/examples/?podcast-spectrogram.js):
+it combines windowed STFT rendering, the zoom plugin, a timeline, and the waveform's
+playhead. The playhead is part of the waveform wrapper's cursor layer, so it stays
+aligned with the spectrogram while zooming and scrolling. Repeated redraws at a new
+zoom reuse the cached STFT analysis; zooming far enough in windowed mode recomputes
+only the visible segments at the new resolution.
+
 ## CSS styling
 
 wavesurfer.js v7 is rendered into a Shadow DOM tree. This isolates its CSS from the rest of the web page.

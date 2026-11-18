@@ -3,6 +3,11 @@
  *
  * Render a spectrogram visualisation of the audio.
  *
+ * The spectrogram is mounted inside the waveform wrapper beneath the renderer's cursor layer,
+ * so the standard playhead stays visible and aligned across zoom changes. Full rendering redraws
+ * from its retained STFT data on zoom; windowed rendering follows playback and scroll events to
+ * keep the visible segments in sync with the current viewport.
+ *
  * @author Pavel Denisov (https://github.com/akreal)
  * @see https://github.com/wavesurfer-js/wavesurfer.js/pull/337
  *
